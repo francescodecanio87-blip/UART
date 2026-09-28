@@ -1,0 +1,13 @@
+*.jou
+*.log
+*.str
+*.pb
+
+UART.cache/
+UART.gen/
+UART.hw/
+UART.ip_user_files/
+UART.runs/
+UART.sim/
+vivado*.jou
+vivado*.log

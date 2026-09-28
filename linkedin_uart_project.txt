@@ -1,0 +1,41 @@
+Francesco DE CANIO - francesco_decanio@hotmail.com
+
+PROGETTO UART SU FPGA: COMUNICAZIONE TRA PC E ZYBO
+
+Ho realizzato e testato un modulo UART completamente implementato nella Programmable Logic (PL) della scheda Zybo, senza utilizzare la Processing System (PS).
+
+Il progetto permette di scambiare dati tra un PC e la FPGA tramite un convertitore USB-UART CP2102 collegato al connettore Pmod JE.
+
+Collegamenti utilizzati:
+- CP2102 TXD -> Pmod JE1, ingresso UART della FPGA
+- CP2102 RXD -> Pmod JE2, uscita UART della FPGA
+- CP2102 GND -> GND della Zybo
+
+Il sistema utilizza una comunicazione seriale a 115200 baud, con formato 8N1:
+- 8 bit di dati
+- nessuna parita'
+- 1 bit di stop
+
+Il clock della Zybo e' a 125 MHz e il parametro CLKS_PER_BIT e' impostato a 1085.
+
+Il ricevitore UART include una macchina a stati che:
+- rileva il bit di start;
+- verifica il bit di start al centro del suo intervallo;
+- campiona gli 8 bit di dati;
+- controlla il bit di stop;
+- genera un impulso di validita' quando un byte e' stato ricevuto.
+
+Poiche' il segnale UART arriva in modo asincrono rispetto al clock della FPGA, ho utilizzato una catena di sincronizzazione composta da due flip-flop:
+
+(* ASYNC_REG = "TRUE" *) reg sync_stage1 = 1'b1;
+(* ASYNC_REG = "TRUE" *) reg sync_stage2 = 1'b1;
+
+L'attributo ASYNC_REG comunica a Vivado che i due registri appartengono a un sincronizzatore per segnali asincroni. In questo modo il tool puo' posizionarli correttamente e ridurre il rischio che la metastabilita' si propaghi nella logica del ricevitore.
+
+Ho inoltre aggiunto un registro di attesa nel loopback per evitare la perdita di caratteri consecutivi quando il trasmettitore e' ancora occupato con il byte precedente.
+
+Il test finale ha confermato il corretto loopback dei dati: i caratteri inviati dal PC vengono ricevuti dalla FPGA e ritrasmessi correttamente al terminale seriale.
+
+Questo progetto rappresenta la base per sviluppare protocolli piu' complessi tra PC e FPGA, ad esempio comandi, pacchetti con lunghezza variabile, checksum e controllo di periferiche nella Programmable Logic.
+
+#FPGA #UART #Zybo #Vivado #Verilog #ProgrammableLogic #DigitalDesign #EmbeddedSystems #HardwareDesign #Xilinx
